@@ -1,3 +1,0 @@
-# 编译server.c文件
-
-gcc -I ../common/ server.c ../common/tcp_server.c -o server
