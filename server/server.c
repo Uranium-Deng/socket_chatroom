@@ -56,7 +56,7 @@ void *work(void *arg) {
         }
         printf("Recv: %s\n", msg);
         getUppercaseMsg(msg);
-        if (send(fd, msg, sizeof(fd), 0) <= 0) {
+        if (send(fd, msg, sizeof(msg), 0) <= 0) {
             perror("error in send function");
             close(fd);
             break;
