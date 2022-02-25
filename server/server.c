@@ -2,108 +2,87 @@
 	> File Name: server.c
 	> Author: Uranium_Deng
 	> Mail: 1927157164@qq.com
-	> Created Time: 2022年02月23日 星期三 21时45分01秒
+	> Created Time: 2022年02月24日 星期四 16时55分20秒
  ************************************************************************/
 
-#include "head.h"
-#include "tcp_server.h"
+#include "../common/head.h"
+#include "../common/tcp_server.h"
+#include "../common/common.h"
+#include "../common/chatroom.h"
 
-#define MAXCLIENTS 1024
-
-struct Client {
-    int flag;
-    int fd;
+struct User {
+    char name[32];
+    int online;
     pthread_t tid;
+    int fd;
 };
 
-struct Client *client;
+char *cfg_file = "./server.cfg";
 
-/*在client数组中找到一个空位置，存放fd*/
-int find_idx() {
-    for (int i = 0; i < MAXCLIENTS; i++) {
-        if (client[i].flag) continue;
-        return i;
-    }
-    return -1;
-}
+struct User *client;
 
-/*将信息小写字母转为大写字母*/
-void getUppercaseMsg(char *msg) {
-    for (int i = 0; i < strlen(msg); i++) {
-        if (msg[i] >= 'a' && msg[i] <= 'z') {
-            msg[i] += 'A' - 'a';
+
+/* 判断用户name是否在线 */
+bool check_online(char *name) {
+    for (int i = 0; i < MAX_CLIENT; i++) {
+        if (client[i].online == 1 && strcmp(client[i].name, name)) {
+            return true;
         }
     }
+    return false;
 }
 
+/* 在User数组中找出并返回一个空闲下标用于存放客户信息 */
+int find_free_index() {
 
+}
+
+/* 线程对应的work函数 */
 void *work(void *arg) {
-    int *idx = (int *)arg;
-    int fd = client[*idx].fd;
-    if (send(fd, "You Are Here", sizeof("You Are Here"), 0) < 0) {
-        perror("send");
-        close(fd);
-        client[*idx].flag = 0;
-        return NULL;
-    }
-
-    while (1) {
-        char msg[512] = {0};
-        if (recv(fd, msg, sizeof(msg), 0) <= 0) {
-            perror("error in recv function");
-            close(fd);
-            break;
-        }
-        printf("Recv: %s\n", msg);
-        getUppercaseMsg(msg);
-        if (send(fd, msg, sizeof(msg), 0) <= 0) {
-            perror("error in send function");
-            close(fd);
-            break;
-        }
-    }
-    close(fd);
-    client[*idx].flag = 0;
-    return NULL;
+    
 }
 
-int main(int argc, char **argv) {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s port!\n", argv[0]);
-        return 1;
-    }
 
-    int port, server_listen;
-    port = atoi(argv[1]);
+int main() {
+    int port, server_listen, fd;
+    struct RecvMsg recvmsg;
+    struct Msg msg;
+    port = atoi(get_value(cfg_file, "SERVER_PORT"));
+    client = (struct User *)calloc(MAX_CLIENT, sizeof(struct User));
 
     if ((server_listen = socket_create(port)) < 0) {
         perror("socket_create");
-        return 2;
+        return 1;
     }
 
-    pthread_t tid;
-    client = (struct Client *)malloc(sizeof(struct Client) * MAXCLIENTS);
-    memset(client, 0, sizeof(client));
-
     while (1) {
-        int fd;
-        while ((fd = accept(server_listen, NULL, NULL)) < 0) {
+        if ((fd = accept(server_listen, NULL, NULL)) < 0) {
             perror("accept");
+            continue;
         }
-        printf("New Client Login\n");
-        int idx = -1;
-        if ((idx = find_idx()) < 0) {
-            fprintf(stderr, "FULL!\n");
+        // accept()接受用户连接后，将用户信息添加到User数组中，并开启一个新线程为其服务
+
+        recvmsg = chat_recv(fd);
+        if (recvmsg.retval < 0) {
+            // 接收用户信息失败，关闭连接
             close(fd);
             continue;
         }
-        client[idx].flag = 1;
-        client[idx].fd = fd;
-        pthread_create(&client[idx].tid, NULL, work, (void *)&idx);
+        if (check_online(recvmsg.msg.from)) {
+            // 用户已在线，拒绝连接
+            
+        } else {
+            // 登记用户信息并创建线程为之服务
+            int idx = find_free_index();
+            client[idx].online = 1;
+            client[idx].fd = fd;
+            strcmp(client[idx].name, recvmsg.msg.from);
+            pthread_create(&client[idx].tid, NULL, work, NULL);
+        }
+
     }
 
     return 0;
 }
 
-// ./server 8888
 

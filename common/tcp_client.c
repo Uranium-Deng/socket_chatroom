@@ -6,7 +6,8 @@
  ************************************************************************/
 
 
-#include "./head.h"
+#include "head.h"
+#include "tcp_client.h"
 
 int socket_connect(char *host, int port) {
     int sockfd;
