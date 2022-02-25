@@ -52,7 +52,7 @@ void *work(void *arg) {
     while (1) {
         rmsg = chat_recv(client_fd);
         if (rmsg.retval < 0) {
-            printf(PINK"Logout: "NONE"%s \n!", client[*idx].name);
+            printf(PINK"Logout: "NONE"%s\n", client[*idx].name);
             close(client_fd);
             client[*idx].online = 0;
             return NULL;
@@ -92,13 +92,13 @@ int main() {
         if (check_online(recvmsg.msg.from)) {
             // 用户已在线，拒绝连接，并告知client端
             msg.flag = 3;
-            strcpy(msg.message, "You have Already Login in!");
+            strcpy(msg.message, "You have Already Login in!\n");
             chat_send(msg, fd);
             close(fd);
             continue;
         }
          msg.flag = 2;
-         strcpy(msg.message, "Welcome to this Chatroom!");
+         strcpy(msg.message, "Welcome to this Chatroom!\n");
          chat_send(msg, fd);
 
         // 登记用户信息并创建线程为之服务

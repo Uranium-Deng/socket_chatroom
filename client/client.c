@@ -36,7 +36,7 @@ int main() {
         fprintf(stderr, "Error!\n");
         return 1;
     }
-    printf(GREEN"Server"NONE": %s\n", rmsg.msg.message);
+    printf(GREEN"Server"NONE": %s", rmsg.msg.message);
     if (rmsg.msg.flag == 3) {
         close(sockfd);
     }
