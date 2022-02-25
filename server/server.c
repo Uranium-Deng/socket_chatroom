@@ -9,6 +9,8 @@
 #include "../common/tcp_server.h"
 #include "../common/common.h"
 #include "../common/chatroom.h"
+#include "../common/color.h"
+
 
 struct User {
     char name[32];
@@ -26,6 +28,7 @@ struct User *client;
 bool check_online(char *name) {
     for (int i = 0; i < MAX_CLIENT; i++) {
         if (client[i].online == 1 && strcmp(client[i].name, name)) {
+            printf(YELLOW"W"NONE": %s is online\n", name);
             return true;
         }
     }
@@ -42,7 +45,21 @@ int find_free_index() {
 
 /* 线程对应的work函数 */
 void *work(void *arg) {
-    printf("client login\n");
+    int *idx = (int *)arg;
+    int client_fd = client[*idx].fd;
+    struct RecvMsg rmsg;
+    printf(GREEN"Login "NONE": %s\n", client[*idx].name);
+    while (1) {
+        rmsg = chat_recv(client_fd);
+        if (rmsg.retval < 0) {
+            printf(PINK"Logout: "NONE"%s \n!", client[*idx].name);
+            close(client_fd);
+            client[*idx].online = 0;
+            return NULL;
+        }
+        printf(BLUE"%s"NONE": %s\n", rmsg.msg.from, rmsg.msg.message);
+    }
+
     return NULL;
 }
 
@@ -73,17 +90,23 @@ int main() {
             continue;
         }
         if (check_online(recvmsg.msg.from)) {
-            // 用户已在线，拒绝连接
-            
-        } else {
-            // 登记用户信息并创建线程为之服务
-            int idx = find_free_index();
-            client[idx].online = 1;
-            client[idx].fd = fd;
-            strcmp(client[idx].name, recvmsg.msg.from);
-            pthread_create(&client[idx].tid, NULL, work, NULL);
+            // 用户已在线，拒绝连接，并告知client端
+            msg.flag = 3;
+            strcpy(msg.message, "You have Already Login in!");
+            chat_send(msg, fd);
+            close(fd);
+            continue;
         }
+         msg.flag = 2;
+         strcpy(msg.message, "Welcome to this Chatroom!");
+         chat_send(msg, fd);
 
+        // 登记用户信息并创建线程为之服务
+        int idx = find_free_index();
+        client[idx].online = 1;
+        client[idx].fd = fd;
+        strcmp(client[idx].name, recvmsg.msg.from);
+        pthread_create(&client[idx].tid, NULL, work, (void *)&idx);
     }
 
     return 0;

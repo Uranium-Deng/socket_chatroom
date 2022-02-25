@@ -8,11 +8,14 @@
 #include "common.h"
 #include "head.h"
 
+char conf_ans[50] = {0};
+
 char *get_value(char *path, char *key) {
     FILE *fp = NULL;
     ssize_t nrd;
     char *line = NULL, *sub = NULL;
-    extern char conf_ans[50];
+    // extern char conf_ans[50];
+    memset(conf_ans, 0, sizeof(conf_ans));
     size_t linecap;
     if (path == NULL || key == NULL) {
         fprintf(stderr, "Error in argument!\n");

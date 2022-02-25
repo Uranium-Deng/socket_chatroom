@@ -9,7 +9,7 @@
 #define _COMMON_H
 
 /* 从配置文件中获取IP地址或port端口 */
-char conf_ans[50];
+extern char conf_ans[50];
 char *get_value(char *path, char *key);
 
 /* 设置非阻塞IO */

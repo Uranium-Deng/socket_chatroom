@@ -1,4 +1,3 @@
 # 编译client.c文件
 
-gcc -I ../common/ client.c ../common/tcp_client.c -lpthread -o client
-
+gcc client.c ../common/tcp_client.c ../common/common.c  ../common/chatroom.c -o client -lpthread

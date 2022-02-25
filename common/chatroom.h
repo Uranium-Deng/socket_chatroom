@@ -10,7 +10,9 @@
 
 struct Msg {
     char from[32];
-    int flag;
+    int flag; 
+    // 0: 公聊信息, 1: 私聊信息, 2:client连接信息或来自server的通知信息 
+    // 3:用于已在线，server端让client断开连接
     char message[512];
 };
 

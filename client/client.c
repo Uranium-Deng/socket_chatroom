@@ -2,27 +2,48 @@
 	> File Name: client.c
 	> Author: Uranium_Deng
 	> Mail: 1927157164@qq.com
-	> Created Time: 2022年02月23日 星期三 21时55分52秒
+	> Created Time: 2022年02月25日 星期五 11时29分00秒
  ************************************************************************/
 
-#include "head.h"
-#include "tcp_client.h"
+#include "../common/head.h"
+#include "../common/chatroom.h"
+#include "../common/common.h"
+#include "../common/tcp_client.h"
+#include "../common/color.h"
 
 
-int main(int argc, char **argv) {
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s ip port!\n", argv[0]);
+char *client_cfg_file = (char *)"./client.cfg";
+
+int main() {
+    int port, sockfd;
+    struct Msg msg;
+    char ip[20] = {0};
+    strcpy(ip, get_value(client_cfg_file, (char *)"SERVER_IP"));
+    port = atoi(get_value(client_cfg_file, (char *)"SERVER_PORT"));
+
+    if ((sockfd = socket_connect(ip, port)) < 0) {
+        perror("socket_connect");
         return 1;
     }
-
-    int sockfd;
-    if ((sockfd = socket_connect(argv[1], atoi(argv[2]))) < 0) {
-        perror("socket_connect");
+    strcpy(msg.from, get_value(client_cfg_file, "MY_NAME"));
+    msg.flag = 2;
+    if (chat_send(msg, sockfd) < 0) {
         return 2;
+    }
+
+    struct RecvMsg rmsg = chat_recv(sockfd);
+    if (rmsg.retval < 0) {
+        fprintf(stderr, "Error!\n");
+        return 1;
+    }
+    printf(GREEN"Server"NONE": %s\n", rmsg.msg.message);
+    if (rmsg.msg.flag == 3) {
+        close(sockfd);
     }
 
     return 0;
 }
 
-// 101.43.167.81
+
+
 
