@@ -36,9 +36,29 @@ int main() {
         fprintf(stderr, "Error!\n");
         return 1;
     }
-    printf(GREEN"Server"NONE": %s", rmsg.msg.message);
+    printf(GREEN"Server: "NONE"%s", rmsg.msg.message);
     if (rmsg.msg.flag == 3) {
         close(sockfd);
+        return 1;
+    }
+
+    pid_t pid;
+    if ((pid = fork()) < 0) {
+        perror("fork");
+    }
+    if (pid == 0) {
+        // 子进程，负责消息发送
+        while (1) {
+            printf(L_PINK"Please input message: "NONE"\n");
+            memset(msg.message, 0, sizeof(msg.message));
+            scanf("%[^\n]s", msg.message);
+            getchar(); 
+            chat_send(msg, sockfd);
+            system("clear");
+        }
+    } else {
+        // 父进程，负责消息接收
+        wait(NULL);
     }
 
     return 0;
