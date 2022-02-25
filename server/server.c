@@ -34,12 +34,16 @@ bool check_online(char *name) {
 
 /* 在User数组中找出并返回一个空闲下标用于存放客户信息 */
 int find_free_index() {
-
+    for (int i = 0; i < MAX_CLIENT; i++) {
+        if (!client[i].online) return i;
+    }
+    return -1;
 }
 
 /* 线程对应的work函数 */
 void *work(void *arg) {
-    
+    printf("client login\n");
+    return NULL;
 }
 
 
