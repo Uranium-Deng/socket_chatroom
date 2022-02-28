@@ -27,7 +27,7 @@ struct User *client;
 /* 判断用户name是否在线 */
 bool check_online(char *name) {
     for (int i = 0; i < MAX_CLIENT; i++) {
-        if (client[i].online == 1 && strcmp(client[i].name, name)) {
+        if (client[i].online == 1 && !strcmp(client[i].name, name)) {
             printf(YELLOW"Warning: "NONE"%s is online\n", name);
             return true;
         }
@@ -139,7 +139,7 @@ void *work(void *arg) {
                     chat_send(rmsg.msg, client_fd);
                     continue;
                 }
-                printf(L_PINK"Note: "NONE" %s 给 %s 发送了一条私密信息😈\n", rmsg.msg.from, to);
+                printf(L_PINK"Note: "NONE" %s 给 %s 发送了一条私密信息 ☕\n", rmsg.msg.from, to);
                 chat_send(rmsg.msg, client[idx].fd);
             }
         } else if (rmsg.msg.flag == 4 && rmsg.msg.message[0] == '#') {
