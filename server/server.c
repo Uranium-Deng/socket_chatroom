@@ -28,7 +28,7 @@ struct User *client;
 bool check_online(char *name) {
     for (int i = 0; i < MAX_CLIENT; i++) {
         if (client[i].online == 1 && strcmp(client[i].name, name)) {
-            printf(YELLOW"W"NONE": %s is online\n", name);
+            printf(YELLOW"Warning: "NONE"%s is online\n", name);
             return true;
         }
     }
@@ -83,7 +83,7 @@ void get_online_client(char *message) {
             if (cnt >= 5) break;
         } 
     }
-    sprintf(temp, " 等%d个用户在线", online_cnts);
+    sprintf(temp, " 等%d个用户在线! 😉", online_cnts);
     strcat(message, temp);
 }
 
@@ -94,26 +94,26 @@ void *work(void *arg) {
     int client_fd = client[idx].fd;
     
     struct RecvMsg rmsg;
-    printf(GREEN"Login "NONE": %s\n", client[idx].name);
+    printf(L_GREEN"🌟 Login🌟 : "NONE" %s\n", client[idx].name);
     rmsg.msg.flag = 2; // 系统通知信息2
-    sprintf(rmsg.msg.message, "你的好友 %s 上线了，和他打个招呼吧!!!", client[idx].name);
+    sprintf(rmsg.msg.message, "你的好友 %s 上线了，和他打个招呼吧! 😀", client[idx].name);
     send_all_except_me(rmsg.msg, idx);
 
     while (1) {
         rmsg = chat_recv(client_fd);
         if (rmsg.retval < 0) { // client下线
-            printf(PINK"Logout: "NONE"%s\n", client[idx].name);
+            printf(L_PINK"⭐ Logout⭐ : "NONE"%s\n", client[idx].name);
             close(client_fd);
             client[idx].online = 0;
             online_cnts--;
-            sprintf(rmsg.msg.message, "好友 %s 已下线.", client[idx].name);
+            sprintf(rmsg.msg.message, "好友 %s 已下线. 😅", client[idx].name);
             rmsg.msg.flag = 2;
             send_all(rmsg.msg);
             return NULL;
         }
 
         if (rmsg.msg.flag == 0) {  // 公聊信息0
-            printf(BLUE"%s"NONE" : %s\n",rmsg.msg.from, rmsg.msg.message);
+            printf(L_BLUE"%s:"NONE" %s\n",rmsg.msg.from, rmsg.msg.message);
             if (!strlen(rmsg.msg.message)) continue;
             send_all(rmsg.msg);
         } else if (rmsg.msg.flag == 1) {  // 私聊信息1
@@ -129,21 +129,21 @@ void *work(void *arg) {
                 // 判断私聊对象是否在线，若不在则告知client私聊对象不在线
                 int ret = 0;
                 if ((ret = check_name(to)) < 0) {
-                    sprintf(rmsg.msg.message, "%s is not online.", to);
+                    sprintf(rmsg.msg.message, "%s is not online. ☕", to);
                     rmsg.msg.flag = 2; 
                     chat_send(rmsg.msg, client_fd);
                     continue;
                 } else if (!strlen(rmsg.msg.message + i)) { // 私聊信息为空
-                    sprintf(rmsg.msg.message, "私聊消息不能为空");
+                    sprintf(rmsg.msg.message, "私聊消息不能为空! 😓");
                     rmsg.msg.flag = 2;
                     chat_send(rmsg.msg, client_fd);
                     continue;
                 }
-                printf(L_PINK"Note: "NONE" %s 给 %s 发送了一条私密信息\n", rmsg.msg.from, to);
+                printf(L_PINK"Note: "NONE" %s 给 %s 发送了一条私密信息😈\n", rmsg.msg.from, to);
                 chat_send(rmsg.msg, client[idx].fd);
             }
         } else if (rmsg.msg.flag == 4 && rmsg.msg.message[0] == '#') {
-            printf(L_PINK"Note: "NONE" %s查询了在线人数\n", rmsg.msg.from);
+            printf(L_PINK"Note: "NONE" %s查询了在线人数😎\n", rmsg.msg.from);
             get_online_client(rmsg.msg.message);
             rmsg.msg.flag = 2;
             chat_send(rmsg.msg, client_fd);                               
@@ -181,13 +181,13 @@ int main() {
         if (check_online(recvmsg.msg.from)) {
             // 用户已在线，拒绝连接，并告知client端
             msg.flag = 3;
-            strcpy(msg.message, "You have Already Login in!\n");
+            strcpy(msg.message, "You have Already Login in! 😁\n");
             chat_send(msg, fd);
             close(fd);
             continue;
         }
         msg.flag = 2;
-        strcpy(msg.message, "Welcome to this Chatroom!\n");
+        strcpy(msg.message, "Welcome to this Chatroom! 😄\n");
         chat_send(msg, fd);
 
         // 登记用户信息并创建线程为之服务
@@ -195,7 +195,7 @@ int main() {
         client[idx].online = 1;
         client[idx].fd = fd;
         online_cnts++;
-        strcmp(client[idx].name, recvmsg.msg.from);
+        strcpy(client[idx].name, recvmsg.msg.from);
         int pthread_ret = pthread_create(&client[idx].tid, NULL, work, (void *)&idx);
         if (pthread_ret) {
             fprintf(stderr, "pthread_create");

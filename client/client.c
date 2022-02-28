@@ -49,7 +49,7 @@ int main() {
         fprintf(stderr, "Error!\n");
         return 1;
     }
-    printf(GREEN"Server: "NONE"%s", rmsg.msg.message);
+    printf(L_GREEN"Server: "NONE"%s", rmsg.msg.message);
     if (rmsg.msg.flag == 3) {
         close(sockfd);
         return 1;
@@ -66,7 +66,7 @@ int main() {
         char c = 'a';
         while (c != EOF) {
             system("clear");
-            printf(PINK"Please input message: "NONE"\n");
+            printf(L_PINK"Please input message: "NONE"\n");
             memset(msg.message, 0, sizeof(msg.message));
             scanf("%[^\n]s", msg.message);
             c = getchar(); 
@@ -83,7 +83,7 @@ int main() {
     } else {
         // 父进程，负责消息接收
         freopen(logfile, "w", stdout);  // 将stdout重定向到logfile中
-        printf(GREEN"Server "NONE": %s\n", rmsg.msg.message);
+        printf(L_GREEN"Server "NONE": %s", rmsg.msg.message);
         fflush(stdout);
 
         while (1) {
@@ -93,11 +93,11 @@ int main() {
                 break;
             }
             if (rmsg.msg.flag == 0) { // 公聊信息
-                printf(BLUE"%s"NONE": %s\n", rmsg.msg.from, rmsg.msg.message);
+                printf(L_BLUE"%s:"NONE" %s\n", rmsg.msg.from, rmsg.msg.message);
             } else if (rmsg.msg.flag == 1) { // 私聊信息
-                printf(BLUE"%s"L_GREEN"*"NONE": %s\n", rmsg.msg.from, rmsg.msg.message);
+                printf(L_BLUE"%s:"L_GREEN"*"NONE" %s\n", rmsg.msg.from, rmsg.msg.message);
             } else if (rmsg.msg.flag == 2) {  // 服务器通知信息
-                printf(YELLOW"通知信息: " NONE "%s\n", rmsg.msg.message);
+                printf(L_YELLOW"通知信息: " NONE "%s\n", rmsg.msg.message);
             } else { // 出错
                 printf("Error!\n");
             }
